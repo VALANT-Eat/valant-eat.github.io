@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VALANT-Eat</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        header {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 1em 0;
+        }
+
+        main {
+            padding: 1em;
+        }
+
+        #search-container {
+            text-align: center;
+            margin-bottom: 2em;
+        }
+
+        #products {
+            display: none; /* Produkte werden standardmäßig ausgeblendet */
+            flex-wrap: wrap;
+            justify-content: space-around;
+        }
+
+        .product {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin: 1em;
+            padding: 1em;
+            width: calc(33% - 2em);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .product img {
+            max-width: 100%;
+            height: auto;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 1em;
+        }
+
+        .product h2 {
+            font-size: 1.2em;
+            margin: 0.5em 0;
+        }
+
+        .product p {
+            color: #555;
+        }
+
+        .product button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 0.5em 1em;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .product button:hover {
+            background-color: #218838;
+        }
+
+        .product input {
+            width: 50px;
+            text-align: center;
+            margin-right: 10px;
+        }
+
+        #cart {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 1em;
+            margin-top: 2em;
+            display: none; /* Produkte im Warenkorb werden standardmäßig ausgeblendet */
+        }
+
+        #cart h2 {
+            font-size: 1.5em;
+            margin-bottom: 0.5em;
+        }
+
+        #cart-items {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+            padding: 0.5em 0;
+        }
+
+        .cart-item .product-info {
+            flex: 1;
+            text-align: left;
+        }
+
+        .cart-item .product-info h3 {
+            margin: 0;
+        }
+
+        .cart-item .product-info p {
+            color: #555;
+            margin: 0.5em 0;
+        }
+
+        .cart-item .product-info img {
+            max-width: 50px;
+            height: auto;
+            margin-right: 1em;
+        }
+
+        .cart-item .product-quantity {
+            flex: 0 0 50px;
+            text-align: center;
+        }
+
+        .cart-item .product-price {
+            flex: 0 0 100px;
+            text-align: right;
+        }
+
+        #cart-total {
+            text-align: right;
+            margin-top: 1em;
+        }
+
+        #cart-total p {
+            margin: 0.5em 0;
+        }
+
+        #checkout-modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+            position: relative;
+            border-radius: 5px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        #checkout-form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #checkout-form label {
+            margin-bottom: 0.5em;
+            font-weight: bold;
+        }
+
+        #checkout-form input,
+        #checkout-form textarea,
+        #checkout-form select,
+        #checkout-form button {
+            padding: 0.8em;
+            margin-bottom: 1em;
+            border-radius: 3px;
+            border: 1px solid #ddd;
+            font-size: 1em;
+        }
+
+        #checkout-form button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        #checkout-form button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>VALANT-Eat</h1>
+    </header>
+    <main>
+        <div id="search-container">
+            <input type="text" id="search-input" placeholder="Produkt suchen...">
+            <button id="search-button">Suchen</button>
+        </div>
+        <section id="products">
+            <!-- Produkte werden hier eingefügt -->
+        </section>
+        <section id="cart">
+            <h2>Warenkorb</h2>
+            <ul id="cart-items">
+                <!-- Warenkorb-Elemente werden hier eingefügt -->
+            </ul>
+            <div id="cart-total">
+                <p>Gesamt: <span id="cart-total-price">0.00</span> CHF</p>
+            </div>
+            <button id="checkout-button">Bestellung abschicken</button>
+        </section>
+    </main>
+    <div id="checkout-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Kundendaten eingeben</h2>
+            <form id="checkout-form" action="https://formspree.io/f/myzgzgvg" method="POST">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required>
+                <label for="address">Adresse:</label>
+                <textarea id="address" name="address" required></textarea>
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+                <label for="delivery-time">Lieferzeit:</label>
+                <select id="delivery-time" name="delivery-time">
+                    <option value="sofort">Sofort</option>
+                    <option value="heute-mittags">Heute Mittags</option>
+                    <option value="heute-abends">Heute Abends</option>
+                    <option value="morgen">Morgen</option>
+                </select>
+                <label for="comments">Sonstige Bemerkungen:</label>
+                <textarea id="comments" name="comments"></textarea>
+                <input type="hidden" id="order-details" name="order-details">
+                <button type="submit">Jetzt bestellen</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const products = [
+                { id: 1, name: "Petersilie", price: 2.20 },
+                { id: 2, name: "Dill", price: 2.20 },
+                { id: 3, name: "Basilikum", price: 2.90 },
+                { id: 4, name: "Erdbeere", price: 3.50 },
+                { id: 5, name: "Radieschen", price: 2.10 },
+                { id: 6, name: "Tomate", price: 1.80 },
+                { id: 7, name: "Pfefferminze", price: 2.60 },
+                { id: 8, name: "Hugo-Minze", price: 3.10 },
+                { id: 9, name: "Walderdbeeren", price: 3.90 },
+                { id: 10, name: "Lauch", price: 2.20 },
+                { id: 11, name: "Zwiebel", price: 1.40 },
+                { id: 12, name: "Schwarze Johannisbeere", price: 3.50 },
+                { id: 13, name: "Rote Johannisbeere", price: 3.10 },
+                { id: 14, name: "Kopfsalat", price: 1.90 },
+                { id: 15, name: "Eichblattsalat", price: 2.10 },
+                { id: 16, name: "Erbsen", price: 2.90 },
+                { id: 17, name: "Minze-Tee", price: 4.60 },
+                { id: 18, name: "Gurke", price: 2.20 }
+            ];
+
+            const productsSection = document.getElementById('products');
+            const cartItems = document.getElementById('cart-items');
+            const cartTotalPrice = document.getElementById('cart-total-price');
+            const checkoutButton = document.getElementById('checkout-button');
+            const searchInput = document.getElementById('search-input');
+            const searchButton = document.getElementById('search-button');
+            const checkoutModal = document.getElementById('checkout-modal');
+            const closeModal = document.querySelector('.close');
+            const checkoutForm = document.getElementById('checkout-form');
+
+            let cart = [];
+
+            // Produkte initial verstecken
+            checkoutModal.style.display = 'none';
+
+            // Event Listener für die Suchfunktion
+            searchButton.addEventListener('click', searchProducts);
+            searchInput.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') {
+                    searchProducts();
+                }
+            });
+
+            // Event Listener für Bestellung abschicken
+            checkoutButton.addEventListener('click', () => {
+                if (cart.length > 0) {
+                    checkoutModal.style.display = 'block';
+                } else {
+                    alert('Bitte fügen Sie Produkte zum Warenkorb hinzu.');
+                }
+            });
+
+            // Produkte anzeigen, wenn Suchbegriff eingegeben wird
+            function searchProducts() {
+                const searchTerm = searchInput.value.toLowerCase();
+                const filteredProducts = products.filter(product => product.name.toLowerCase().includes(searchTerm));
+                displayProducts(filteredProducts);
+            }
+
+            // Produkte anzeigen
+            function displayProducts(productsToShow) {
+                productsSection.innerHTML = '';
+                productsToShow.forEach(product => {
+                    const productElement = createProductElement(product);
+                    productsSection.appendChild(productElement);
+                });
+                productsSection.style.display = 'flex'; // Produkte anzeigen, wenn sie geladen sind
+            }
+
+            // Produkt-Element erstellen
+            function createProductElement(product) {
+                const productElement = document.createElement('div');
+                productElement.classList.add('product');
+                productElement.innerHTML = `
+                    <img src="https://via.placeholder.com/150" alt="${product.name}">
+                    <h2>${product.name}</h2>
+                    <p>${product.price.toFixed(2)} CHF</p>
+                    <button data-id="${product.id}">In den Warenkorb</button>
+                `;
+                // Event Listener für den Warenkorb-Button
+                productElement.querySelector('button').addEventListener('click', () => {
+                    addToCart(product);
+                });
+                return productElement;
+            }
+
+            // Produkt zum Warenkorb hinzufügen
+            function addToCart(product) {
+                const existingItem = cart.find(item => item.product.id === product.id);
+                if (existingItem) {
+                    existingItem.quantity++;
+                } else {
+                    cart.push({ product, quantity: 1 });
+                }
+                updateCart();
+            }
+
+            // Warenkorb aktualisieren
+            function updateCart() {
+                cartItems.innerHTML = '';
+                let totalPrice = 0;
+                cart.forEach(item => {
+                    const cartItem = document.createElement('li');
+                    cartItem.classList.add('cart-item');
+                    cartItem.innerHTML = `
+                        <div class="product-info">
+                            <h3>${item.product.name}</h3>
+                            <p>${item.product.price.toFixed(2)} CHF x ${item.quantity}</p>
+                        </div>
+                        <div class="product-quantity">${item.quantity}</div>
+                        <div class="product-price">${(item.product.price * item.quantity).toFixed(2)} CHF</div>
+                    `;
+                    cartItems.appendChild(cartItem);
+                    totalPrice += item.product.price * item.quantity;
+                });
+                cartTotalPrice.textContent = totalPrice.toFixed(2);
+                document.getElementById('cart').style.display = 'block';
+            }
+
+            // Formular abschicken
+            checkoutForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = new FormData(checkoutForm);
+                const orderDetails = {
+                    name: formData.get('name'),
+                    address: formData.get('address'),
+                    email: formData.get('email'),
+                    deliveryTime: formData.get('delivery-time'),
+                    comments: formData.get('comments'),
+                    products: cart.map(item => ({
+                        name: item.product.name,
+                        price: item.product.price.toFixed(2),
+                        quantity: item.quantity
+                    }))
+                };
+                document.getElementById('order-details').value = JSON.stringify(orderDetails);
+                checkoutForm.submit();
+            });
+
+            // Modal-Fenster öffnen/schließen
+            checkoutButton.addEventListener('click', () => {
+                checkoutModal.style.display = 'block';
+            });
+
+            closeModal.addEventListener('click', () => {
+                checkoutModal.style.display = 'none';
+            });
+
+            window.addEventListener('click', (event) => {
+                if (event.target === checkoutModal) {
+                    checkoutModal.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
